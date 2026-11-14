@@ -10,7 +10,7 @@ date:   2026/11/07
 
 LLM based translations are starting to be a crucial niche in fanmade translations, following the technology of the traditional machine translation software options, we have a few hiccups that can be addressed with this project. These concerns that will be addressed should be:
 
-- **OCR options are a last resort:** Other forms of text parsing are much faster, more reliable and efficient on resource use. OCR is still important for cases when we can't parse the text or get it through memory hooks, and it is the input method for the first version of ToucanTL. Other text sources can be added later through the same pipeline instead of making the whole application depend on OCR.
+- **OCR options are a last resort:** Other forms of text parsing are much faster, way more reliable and efficient on resource use. OCR is still important for cases when we can't parse the text or get it through memory hooks, and it is the input method for the first version of ToucanTL. Other text sources can be added later through the same pipeline instead of making the whole application depend on OCR.
 
 - **Translations lack context:** With gen AI, translations are a mixed bag, if we just feed them directly the ai will have trouble identifying cues about the tone of the scenes in media, and will make mistakes based on literal translations of words. LLMs can bridge this gap if they are fed the needed context, so they can help instead in scenes and light localization work.
 
@@ -28,7 +28,7 @@ We may want to also do a document parser such as a pdf reader into the software,
 
 ToucanTL is meant to be a desktop program, written mostly in python, using PySide6 (Qt6) for a lightweight multi-window UI, and with Llama.cpp to run small GGUF models as well as PaddleOCR. **Importantly:**
 
-+ I need to make sure that these core dependencies are not tightly coupled to the code.
++ Make sure that these core dependencies are not tightly coupled to the code.
 + The program needs to do screen sharing on Wayland via xdg-desktop-portal (ScreenCast) and PipeWire.
 + The program will get a stream from the window or screen selected, and will take snapshots in memory.
 + The user needs to either select a small section on the screen or set the whole area.
