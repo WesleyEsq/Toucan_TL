@@ -1,2 +1,2 @@
 # ToucanTL
- Translator lens for visual novels and Manga
+Translator lens for visual novels and Manga

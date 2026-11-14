@@ -9,9 +9,13 @@ Building a real-time translation lens on Linux with Wayland presents two main cl
 PySide6 (Qt6) fits the view layer for several practical reasons:
 
 - Multiple small `QWidget` windows share a single Python process instead of requiring separate browser processes, though combined memory use still needs measurement alongside OCR and local models.
+
 - Qt supports per-pixel transparency through `FramelessWindowHint` and `WA_TranslucentBackground`, depending on compositor behavior.
+
 - Click-through behavior can use `WA_TransparentForMouseEvents`, which varies across Wayland compositors and must be tested on each supported environment with a normal focusable window fallback.
+
 - Qt Style Sheets (QSS) handle flat themes and font scaling, paired with layout reflow and clipping checks when zooming.
+
 - Qt6 integrates with the Linux AT-SPI2 accessibility bus, though custom widgets still need explicit accessible names, focus order, keyboard navigation, and screen-reader testing.
 
 Tkinter and CustomTkinter were ruled out due to weak Wayland scaling and whole-window alpha transparency that fades text along with the background, while DearPyGui lacks native accessibility support.
@@ -23,14 +27,19 @@ Tkinter and CustomTkinter were ruled out due to weak Wayland scaling and whole-w
 Following the modular guidelines, windows and genuinely reusable widgets live in small classes under `view/` without mixing in pipeline logic. The client uses three window roles:
 
 1. **Main control window:** Houses the first-run setup wizard, translation mode toggles, language pickers, theme and zoom settings, and provider usage information when available.
+
 2. **Translation lens widget:** A minimal, resizable, frameless translucent box that shows translated text either over the game or docked on a second monitor.
+
 3. **Region selector:** Allows the user to crop capture to a specific dialog box or manga speech area instead of scanning the full screen.
 
 On Wayland, normal native windows (`xdg-shell`) cannot force global screen coordinates or always-on-top stacking. Support is therefore organized by what each compositor allows:
 
 - **Normal and second-monitor windows:** The baseline mode. Standard windows avoid most overlay limitations, though placement and fullscreen interaction still depend on the compositor.
+
 - **Layer-shell overlays:** Supported wlroots compositors and KDE versions can expose overlay surfaces through `layer-shell-qt`. Stacking, fullscreen games, resizing, and input pass-through must be tested on each environment before listing it as supported. GTK4 with `gtk4-layer-shell` remains a backup investigation only if Qt cannot meet a required case.
+
 - **XWayland fallback:** The Qt `xcb` backend can be tested as an alternative, though X11 always-on-top hints cannot reliably stack above native Wayland or fullscreen surfaces and do not provide a general GNOME solution.
+
 - **Graceful fallback:** When overlay or click-through support is unavailable, translations stay in a normal window and the limitation is explained clearly to the user.
 
 ---

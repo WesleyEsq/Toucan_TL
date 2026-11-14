@@ -8,13 +8,13 @@ date:   2026/11/07
 
 ## The project:
 
-LLM based translations are starting to be a crucial niche in fanmade translations, following the technology of the traditional machine translation software options, we have a few hiccups that can be addressed with this project. These concerns that will be addressed should be:
+LLM based translations are starting to be an important niche in fanmade translations, following the technology of the traditional machine translation software options, we have a few hiccups that can be addressed with this project. These concerns that will be addressed should be:
 
 - **OCR options are a last resort:** Other forms of text parsing are much faster, way more reliable and efficient on resource use. OCR is still important for cases when we can't parse the text or get it through memory hooks, and it is the input method for the first version of ToucanTL. Other text sources can be added later through the same pipeline instead of making the whole application depend on OCR.
 
 - **Translations lack context:** With gen AI, translations are a mixed bag, if we just feed them directly the ai will have trouble identifying cues about the tone of the scenes in media, and will make mistakes based on literal translations of words. LLMs can bridge this gap if they are fed the needed context, so they can help instead in scenes and light localization work.
 
-- **Tools are behind paywalls:** Existing OCR software depend entirely on the cloud, sending screen captures of the device to cloud models to read, translate and bring back the translation, this is inefficient and expensive or demands ads due to the architecture.
+- **Tools are behind paywalls:** Most existing OCR software depend entirely on the cloud, sending screen captures of the device to cloud models to read, translate and bring back the translation, this is inefficient, expensive or demands ads due to the architecture, as well as being a privacy risk for users.
 
 - **Portability:** A big advantage of OCR is that it can work without game-specific hooks or modifications, since the main requirement is an image of the text. The application itself can still need language data, models, permissions or API keys, so portability should not be confused with having no setup at all.
 
@@ -29,18 +29,26 @@ We may want to also do a document parser such as a pdf reader into the software,
 ToucanTL is meant to be a desktop program, written mostly in python, using PySide6 (Qt6) for a lightweight multi-window UI, and with Llama.cpp to run small GGUF models as well as PaddleOCR. **Importantly:**
 
 + Make sure that these core dependencies are not tightly coupled to the code.
+
 + The program needs to do screen sharing on Wayland via xdg-desktop-portal (ScreenCast) and PipeWire.
+
 + The program will get a stream from the window or screen selected, and will take snapshots in memory.
+
 + The user needs to either select a small section on the screen or set the whole area.
+
 + Use image debouncing to avoid running OCR on unchanged frames.
+
 + Run OCR and compare the resulting text with the previous stable result, since an image can change without the dialogue changing.
+
 + Wait for text to remain stable briefly before translating it, so partially typed dialogue does not create unnecessary requests.
+
 + Pass the information to the LLM, or optionally pass it directly to a traditional machine translation engine.
+
 + Keep only a bounded amount of pending work and reject stale responses, so an old translation cannot replace a newer one.
 
 The main fundamentals of what the program should do are:
 
-1. Be efficient
+1. Be efficient in resource use, this is an app that runs in the background
 
 2. Reuse network connections and measure capture-to-translation delay instead of assuming that a particular network setup is faster.
 
@@ -60,14 +68,14 @@ Also, as the second issue, we have that directly calling the API from a desktop 
 
 + A prototype used a small server that stays connected to the AI endpoint, and it appeared to save around 400 milliseconds. That is a useful observation, not proof that every setup needs a gateway. First compare it with a direct client that reuses its HTTP connection. If the gateway stays, it must be an optional adapter with a defined local or remote deployment, key ownership and access control.
 
-Fast flash models are good candidates, but model choice still needs a small quality and latency evaluation. Context can improve a translation, but it cannot guarantee that a weaker model will always be enough.
+Fast flash models are good candidates, but model choice still needs a small quality and latency evaluation. Context can improve a translation quality in models like the current Luna and Haiku.
 
 + The use of traditional machine translation engines can also work without the hassle of context in exchange of losing it entirely, **this can actually be beneficial for a lot of uses.** so it should be an option for both local hosting as well as with the google translate API.
 
 
 ## Wait no, context can be horrible to do properly
 
-The main thing that prevents a context engine from working properly is that the user can go back to previous text, open a backlog or load an old save instead of reading linearly. The AI might become confused by repeated dialogue or dramatic scene changes. Without tracking internal game state, I cannot reliably infer what every change means.
+The main thing that prevents a context engine from working properly is that the user can go back to previous text, open a backlog or load an old save instead of reading linearly. The AI might become confused by repeated dialogue or dramatic scene changes. Without tracking internal game state, the AI cannot ever reliably infer what every change means.
 
 Context therefore starts as optional, bounded and session-scoped. The user can inspect, clear and disable it, and starting a new session does not silently reuse an old one. Durable character or setting facts should only be added when their source is known and the user can correct them. The model must not rewrite persistent context by itself, because OCR text is untrusted input and a bad inference could poison later translations. Context also needs to be compared against a no-context baseline before I add more complexity.
 
@@ -75,7 +83,7 @@ Context therefore starts as optional, bounded and session-scoped. The user can i
 
 ## Accessibility and other concerns
 
-The tool should use WCAG 2 as inspiration for a practical desktop accessibility checklist rather than claim WCAG conformance. This means keyboard-only operation, visible focus, screen-reader labels through AT-SPI2, zoom without clipped content, high-contrast plain themes and control over when new translations are announced. Qt provides useful support here, but the widgets still need testing.
+The tool should use WCAG 2 as inspiration for a practical desktop accessibility checklist rather than claim WCAG conformance (and it would need a really in depth quality asurance validation). This means keyboard-only operation, visible focus, screen-reader labels through AT-SPI2, zoom without clipped content, high-contrast plain themes and control over when new translations are announced. Qt provides useful support here, but the widgets still need testing.
 
 There needs to be a setup wizard on first run. It sets the UI language, source OCR language and target translation language, then the theme and translation provider. English is the initial UI language; Spanish, French, Japanese and Mandarin Chinese are later UI localization goals. OCR source languages and translation language pairs are separate capabilities and must be listed by the selected engines. The wizard is required, but it should only ask for what the chosen provider needs.
 
@@ -103,9 +111,9 @@ Develop a desktop application based in Optical Character Recognition (OCR) for t
 
 6. The program can be used without a terminal or game-specific technical setup. The first-run wizard may still install or select language data and models, request capture permission or ask for an API key. The color theme needs to be plain, without animations and gradient effects.
 
-7. A configuration menu that is easy to use, to set the mode and values for translation.
+7. A configuration menu that takes seconds to use, to set the mode and values for translation.
 
-8. Unit tests and Integration tests.
+8. Unit tests and Integration tests between modules.
 
 9. Keep the [threat model](7-Threat%20model.md) short and cover captured text, API keys, logs, stored context, cloud providers, the optional gateway and untrusted OCR text. OWASP is useful for ideas, but the threats should be based on this desktop application's actual data flow.
 
@@ -121,20 +129,34 @@ Develop a desktop application based in Optical Character Recognition (OCR) for t
 
 5. Overcomplicating the context engine. Should be a smaller piece of the pipeline.
 
+6. Full Unit testing coverage, we have to prioritize core bussiness logic.
+
 ## Acceptance Criteria
 
 - The application can select a monitor, and a window where the desktop portal supports it.
+
 - Resizing and display scaling keep the selected region aligned, or pause and ask the user to select it again.
+
 - A normal translation window works on the reference desktop; overlay and click-through support depend on the compositor and have a normal-window fallback.
+
 - A supported small language model and OCR engine can run on the documented reference hardware, with clear behavior for CPU fallback and insufficient memory.
+
 - Cloud translation can be used without running a local translation model.
+
 - The UI shows provider-reported usage when available, and clearly labels estimates or unavailable values instead of treating every provider as token-based.
+
 - The user can switch between LLM and traditional machine translation without leaking requests or context between sessions.
+
 - The user can pause capture, see the original OCR text and translation, and understand provider or permission failures.
+
 - Context is optional, bounded, inspectable and clearable.
+
 - Unit tests are human readable (AAA and builders for complex objects) and focus on business logic.
+
 - Public functions and files have useful documentation in accordance with [2-guidelines.md](2-guidelines.md).
+
 - Documentation is up to date within this parallel documentation folder.
+
 - Performance and memory targets are recorded after the feasibility benchmarks instead of being invented before I have reference hardware.
 
 ## Nice to haves
@@ -143,3 +165,4 @@ Develop a desktop application based in Optical Character Recognition (OCR) for t
 2. Automatically detect the language in a screenshot; I can rely on the user manually selecting it for now.
 3. A Flatpak. This will probably be the last packaging target, although a small packaging check should happen early enough to catch portal and dependency problems.
 4. Customizable color theme options for the UI.
+5. Support for Gemini and Deepseek API Keys, without full integration of either so we can add more later.

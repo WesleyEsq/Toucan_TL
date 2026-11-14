@@ -61,8 +61,13 @@ In the UI layer, extract a `QWidget` component when it has an independent role o
 External documentation inside `doc/` helps both people and coding agents understand the system, so it needs to stay clear both when rendered and when read as raw markdown. Follow these habits when writing or updating docs:
 
 1. **Keep the tone plain and direct:** Write straightforward, matter-of-fact technical prose where sentences connect cleanly from one point to the next. Avoid chatty filler on one hand, and stiff, repetitive disclaimers (*"this is an option, not a requirement"*) on the other.
+
 2. **Avoid noisy formatting:** Do not scatter inline backticks on ordinary terms, overuse **bold** or *italics*, or rely on wide markdown tables that are hard to read in a plain text editor.
+
 3. **Give structure breathing room:** Use short paragraphs alongside lists instead of cramming headings, prose, and lists together without blank lines.
+
 4. **Say each rule once:** Put a design decision in the document where it belongs and link to it elsewhere rather than repeating the same constraints across multiple files.
+
 5. **Keep documents focused:** Around 200 lines is a good cue to check whether a file covers too many topics and should be split, without fragmenting one coherent explanation unnecessarily.
+
 6. **Keep docs alongside code:** Store module and architecture notes inside `doc/` matching the application layout so the structure stays predictable.
